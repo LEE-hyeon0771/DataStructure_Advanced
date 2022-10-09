@@ -10,7 +10,7 @@
 #include<string.h>
 #define MAXK 2				// MAXK는  2d   임
 #define HALFK MAXK/2        // d (capacity order) 이다.
-#define MAX 100				// 스택 최대 원소수.
+#define MAX 100			// 스택 최대 원소수.
 #define false 0
 #define true 1
 
@@ -163,7 +163,7 @@ nodeptr pop() {
 		printf("stack is empty.\n");
 		return 0;
 	}
-
+	
 	temp = top; ///>>> 현재 top 이 가리키는 곳에 가장 최근의 데이타가 저장되어 있다. 따라서,
 	top--;
 	return stack[temp];
@@ -173,92 +173,120 @@ nodeptr pop() {
 // 레코드 하나를 삽입하는 함수이다.
 // 반환값: 0: 삽입실패,  1, 2: 삽입성공 (1: 층증가 없이, 2:한 층 더 늘어 남.)
 
-int insert_arec(ele in_rec) {	//하나의 레코드를 삽입  key = 회사명  
+int insert_arec(ele in_rec) {   //하나의 레코드를 삽입  key = 회사명  
 
 	int i, j;
-	nodeptr curr, child, new_ptr, tptr = NULL;
+	nodeptr curr, child, new_ptr = NULL, tptr = NULL;
 	ele empty = { "\0",0 };
 	big_node bnode;
 
-	if (!root) {	// root가 NULL이면 btree가 비어있음. 맨 첫 노드를 만들어 여기에 넣는다.
-		root = /* Fill your code */;			// nodeptr형태로 node크기만큼 할당받아 시작주소는 root가 가짐   
-		root->rec[0] = in_rec;					// key값을 root->rec[0]에 넣는다. 
-		root->/* Fill your code */ = root->/* Fill your code */ = NULL;		// p0과 p1에 NULL을 넣는다. 
+	if (!root) {   // root가 NULL이면 btree가 비어있음. 맨 첫 노드를 만들어 여기에 넣는다.
+		root = (nodeptr)malloc(sizeof(node));         // nodeptr형태로 node크기만큼 할당받아 시작주소는 root가 가짐   
+		root->rec[0] = in_rec;               // key값을 root->rec[0]에 넣는다. 
+		root->ptr[0] = root->ptr[1] = NULL;      // p0과 p1에 NULL을 넣는다. 
 		root->fill_cnt = 1;
 		return 1;  // 첫 노드를 만들어 넣고 종료함. 
 	}
 
 	//root is not null
-	curr = root;	
+	curr = root;
 
-    //   아래 빈 곳은 in_rec 이 들어가면 좋을 리프노드를 찾아 curr가 가리키게 하는 부분이 와야 함!!
-    /* 
-	Fill 
-	your 
-	code 
-	*/
+	//   아래 빈 곳은 in_rec 이 들어가면 좋을 리프노드를 찾아 curr가 가리키게 하는 부분이 와야 함!!
+	
+	do {
+		for (i = 0; i < curr->fill_cnt; i++) {
+			if (strcmp(in_rec.name, curr->rec[i].name) < 0)
+				break;
+			else if (strcmp(in_rec.name, curr->rec[i].name) == 0) {
+				
+				printf("동일키 이미 존재로 안 넣음: %s\n", in_rec.name);
+				return 0;
+			}
+		}
+		child = curr->ptr[i];
+		if (child) {
+			push(curr);
+			curr = child;
+		}
+	} while (child);
+
+	//child = NULL;
+
 
 	do {
-		
 		// curr node is not full
-		if (curr->fill_cnt < MAXK) {			
-			for (i = 0; i < curr->fill_cnt; i++)	
-				if (strcmp(in_rec.name, /* Fill your code */ < 0) 
+		if (curr->fill_cnt < MAXK) {
+			for (i = 0; i < curr->fill_cnt; i++)
+				if (strcmp(in_rec.name, curr->rec[i].name) < 0)
 					break;
-			for (j = curr->fill_cnt; j > i; j--) {	
-				curr->ptr[j + 1] = /* Fill your code */;
-				curr->rec[j] = /* Fill your code */;
+			for (j = curr->fill_cnt; j > i; j--) {
+				curr->ptr[j + 1] = curr->ptr[j];
+				curr->rec[j] = curr->rec[j - 1];
 			}
 
-			curr->rec[i] = /* Fill your code */;
-			curr->ptr[i + 1] = /* Fill your code */;
-			curr->fill_cnt++;         
+			curr->rec[i] = in_rec;          //빅노드 중간 curr를 in_rec으로 넣음
+			curr->ptr[i + 1] = new_ptr;     //curr의 뒷부분 new_ptr에 연결
+			curr->fill_cnt++;
 
 			return 1; // 삽입성공 (종류 1: 루트의 추가 없이 가능함).
 		}
-		else {	
+		else {
 			// curr node is full
-			for (i = 0; i < MAXK; i++) {			
-				if (strcmp(in_rec.name, /* Fill your code */) < 0)
+			for (i = 0; i < MAXK; i++) {
+				if (strcmp(in_rec.name, curr->rec[i].name) < 0)
 					break;
 			}
 
-			bnode.ptr[0] = /* Fill your code */; 
-			for (j = 0; j < i; j++) {			 
-				bnode.rec[j] = /* Fill your code */;
-				bnode.ptr[j + 1] = /* Fill your code */;
+			bnode.ptr[0] = curr->ptr[0];
+			for (j = 0; j < i; j++) {
+				bnode.rec[j] = curr->rec[j];
+				bnode.ptr[j + 1] = curr->ptr[j + 1];
 			}
 
-			bnode.rec[j] = /* Fill your code */; 
-			bnode.ptr[j + 1] = /* Fill your code */;   
-			j++; 
+			bnode.rec[j] = in_rec;
+			bnode.ptr[j + 1] = child;
+			j++;
 
-			while (i < MAXK) {		
-				bnode.rec[j] = /* Fill your code */;  
-				bnode.ptr[j + 1] = /* Fill your code */; 
+			while (i < MAXK) {
+				bnode.rec[j] = curr->rec[i];
+				bnode.ptr[j + 1] = curr->ptr[i + 1];
 
-				j++;		
+				j++;
 				i++;
 			}
 
 			//   아래 빈 곳은 big node 를 3 부분으로 나누어 전반부는 curr 에, 가운데 레코드는 in_rec에, 
+			for (i = 0; i < HALFK; i++) {
+				curr->ptr[i] = bnode.ptr[i];
+				curr->rec[i] = bnode.rec[i];
+			}
+			curr->fill_cnt = HALFK;
+			curr->ptr[i] = bnode.ptr[i];
+			curr->ptr[i + 1] = NULL;
 			//   후반부는 새 노드에 넣고, child가 이 새 노드를 가리키게 하는 부분이 와야 함!!
-			/* 
-			Fill 
-			your 
-			code 
-			*/
+			new_ptr = (nodeptr)malloc(sizeof(node));
+			for (i = 0; i < HALFK; i++) {
+				new_ptr->ptr[i] = bnode.ptr[i + 1 + HALFK];
+				new_ptr->rec[i] = bnode.rec[i + 1 + HALFK];
 
-			if (top >= 0) {		// 스택이 emtpy 가 아닐 경우 
-				curr = pop();	// curr 의 부모로 curr를 변경함.
+			}
+			new_ptr->ptr[i] = bnode.ptr[MAXK + 1];
+			new_ptr->fill_cnt = HALFK;
+
+			in_rec = bnode.rec[HALFK];
+			child = new_ptr;
+
+
+			if (top >= 0) {      // 스택이 emtpy 가 아닐 경우 
+				curr = pop();   // curr 의 부모로 curr를 변경함.
 			}
 			else { // 스택이 empty 임 (즉 curr 는 root 노드임.) 새 root 노드를 만들어 curr 의 부모로 함.  
-				tptr = /* Fill your code */;
-				tptr->rec[0] = /* Fill your code */;
-				tptr->ptr[0] = /* Fill your code */;
-				tptr->ptr[1] = /* Fill your code */;
-				tptr->fill_cnt = /* Fill your code */;
-				root = /* Fill your code */;  
+				tptr = (nodeptr)malloc(sizeof(node));
+				tptr->rec[0] = in_rec;
+				tptr->ptr[0] = root;
+				tptr->ptr[1] = child;
+				tptr->fill_cnt = 1;
+				root = tptr;
 				total_height++;
 				return 2; // 삽입 성공 (종류 2: 새 루트가 생김)
 			} // else.
@@ -268,7 +296,7 @@ int insert_arec(ele in_rec) {	//하나의 레코드를 삽입  key = 회사명
 	return 0; // 이 문장을 수행할 경우는 없다.
 } //함수 insert_arec
 
-void insert_btree() {	//파일전체의 레코드를 삽입 ->insert_arec 을 호출 
+void insert_btree() {   //파일전체의 레코드를 삽입 ->insert_arec 을 호출 
 	FILE* fp;
 	ele data;
 	char name_i[20], line[200];
@@ -335,15 +363,19 @@ void insert_btree() {	//파일전체의 레코드를 삽입 ->insert_arec 을 호출
 	fclose(fp);
 }   //  함수 insert_btree
 
+
+
 nodeptr  retrieve(char* skey, int* idx_found) {	//검색 함수 
 	nodeptr curr = root;
 	nodeptr P;
 	int i;
+	int found = 0;
 	do {
 		for (i = 0; i < curr->fill_cnt; i++) {
 			if (strcmp(skey, curr->rec[i].name) < 0)
 				break;
 			else if (strcmp(skey, curr->rec[i].name) == 0) {
+				found = 1;
 				*idx_found = i;
 				return curr;
 			}
@@ -396,21 +428,21 @@ void redistribution(nodeptr father, nodeptr l_sibling, nodeptr r_sibling, char w
 		j = j; 
 
 	//copy l_sibling's content, intermediate key in father, r_sibling's content to twobnode;
-	for (i = 0; i < /* Fill your code */; i++) {
-		twoB.ptr[i] = /* Fill your code */;
-		twoB.rec[i] = /* Fill your code */;
+	for (i = 0; i < l_sibling->fill_cnt; i++) {
+		twoB.ptr[i] = l_sibling->ptr[i];
+		twoB.rec[i] = l_sibling->rec[i];
 	}
-	twoB.ptr[i] = /* Fill your code */;
+	twoB.ptr[i] = l_sibling->ptr[i];
 
 	// 주의:  j 에 father 에서의 l_sibling 에 대한 index 가 들어 있음.
-	twoB.rec[i] = /* Fill your code */; // 부모에서의 중간 키를 가져옴.
+	twoB.rec[i] = father->rec[j];// 부모에서의 중간 키를 가져옴.
 	i++; 
 
-	for (k = 0; k < /* Fill your code */; k++, i++) {
-		twoB.ptr[i] = /* Fill your code */; 
-		twoB.rec[i] =/* Fill your code */;
+	for (k = 0; k < r_sibling->fill_cnt; k++, i++) {
+		twoB.ptr[i] = r_sibling->ptr[k];
+		twoB.rec[i] = r_sibling->rec[k];
 	}
-	twoB.ptr[i] = /* Fill your code */;
+	twoB.ptr[i] = r_sibling->ptr[k];
 
 
 	//Split twobnode into first half, middle record, second half;
@@ -418,23 +450,23 @@ void redistribution(nodeptr father, nodeptr l_sibling, nodeptr r_sibling, char w
 
 	//copy first half to left node;
 	for (n = 0; n < h; n++) { 
-		l_sibling->ptr[n] = /* Fill your code */;
-		l_sibling->rec[n] = /* Fill your code */;
+		l_sibling->ptr[n] = twoB.ptr[n];
+		l_sibling->rec[n] = twoB.rec[n];
 	}
-	l_sibling->ptr[n] = /* Fill your code */;
-	l_sibling->fill_cnt = /* Fill your code */;
+	l_sibling->ptr[n] = twoB.ptr[n];
+	l_sibling->fill_cnt = h;
 
 	//copy second half to r_sibling;
 	n++;
 	for (m = 0; m < (i - h - 1); m++, n++) {
-		r_sibling->ptr[m] = /* Fill your code */;
-		r_sibling->rec[m] = /* Fill your code */;
+		r_sibling->ptr[m] = twoB.ptr[n];
+		r_sibling->rec[m] = twoB.rec[n];
 	}
-	r_sibling->ptr[m] = /* Fill your code */;
-	r_sibling->fill_cnt = /* Fill your code */;
+	r_sibling->ptr[m] = twoB.ptr[n];
+	r_sibling->fill_cnt = i - h - 1;
 
 	//move the middle record to father ;
-	father->rec[j] = /* Fill your code */;
+	father->rec[j] = twoB.rec[h];
 } // end of redistribution
 
 int B_tree_deletion(char* out_key) {
@@ -444,18 +476,20 @@ int B_tree_deletion(char* out_key) {
 
 	// Step (0): search for a record (to be deleted) whose key equals out_key.
 	do {
-		for (i = 0; i < /* Fill your code */; i++)
-			if (strcmp(out_key, /* Fill your code */->rec[i].name) < 0)
+		for (i = 0; i < curr->fill_cnt; i++) {
+			if (strcmp(out_key, curr->rec[i].name) < 0)
 				break;
-			else if (strcmp(out_key, /* Fill your code */->rec[i].name) == 0) {
-				found = 1; break;
+			else if (strcmp(out_key, curr->rec[i].name) == 0) {
+				found = 1;
+				break;
 			}
+		}
 		if (found == 1)
 			break;  // 주의: 변수 i에 찾은 위치가 들어 있음.
 		else {		// curr에 없다. child로 내려 가야 한다.
-			Pt = /* Fill your code */;
+			Pt = curr->ptr[i];
 			if (Pt) {
-				push(/* Fill your code */);
+				push(curr);
 				curr = Pt; 
 			}
 			else
@@ -470,16 +504,17 @@ int B_tree_deletion(char* out_key) {
 	// Step (1):  find successor of d_rec.
 	if (curr->ptr[0]) {   // curr node is not a leaf node  
 		// We need to find successor of out_key ;
-		Pt = /* Fill your code */;
-		push(/* Fill your code */);
+		Pt = curr->ptr[i+1];
+		push(curr);
 		// 가장 왼쪽 포인터를 따라내려 간다.
-		while (/* Fill your code */) {
-			push(/* Fill your code */);
-			Pt = /* Fill your code */;
+		while (Pt->ptr[0]) {
+			push(Pt);
+			Pt = Pt->ptr[0];
 		}
 
 		curr->rec[i] = Pt->rec[0]; 
 		curr = Pt; 
+		strcpy(out_key, Pt->rec[0].name);
 		i = 0; 
 	} //end if
 
@@ -488,16 +523,16 @@ int B_tree_deletion(char* out_key) {
 	do {
 		// Step (2):
 		//Remove record of index i and a pointer to its right from curr's node; 
-		for (j = i + 1; j < /* Fill your code */; j++) { 
-			curr->rec[j - 1] = /* Fill your code */;
-			/* Fill your code */ = curr->ptr[j + 1];
+		for (j = i + 1; j < curr->fill_cnt; j++) { 
+			curr->rec[j - 1] = curr->rec[j];
+			curr->ptr[j] = curr->ptr[j + 1];
 		}
 		curr->fill_cnt = curr->fill_cnt - 1;
 
 		// Step (3):
 		if (curr == root) {
-			if (curr->fill_cnt == /* Fill your code */) {
-				root = /* Fill your code */; 
+			if (curr->fill_cnt == NULL) {
+				root = root->ptr[0];
 				free(curr);
 			}
 			return 1; // deletion succeeded.
@@ -512,9 +547,10 @@ int B_tree_deletion(char* out_key) {
 		father = pop(); // bring father of curr.
 		// r-sibling = pointer to right sibling of curr' node; 
 		// l-sibling = pointer to left sibling of curr's node;
-		for (j = 0; j <= father->fill_cnt; j++)
+		for (j = 0; j <= father->fill_cnt; j++) {
 			if (father->ptr[j] == curr) // find ptr of father which goes down to curr.
 				break;
+		}
 		if (j >= 1)
 			l_sibling = father->ptr[j - 1];
 		else
@@ -547,19 +583,34 @@ int B_tree_deletion(char* out_key) {
 			//  Let leftptr be a pointer to left one of curr and sibling chosen to merge ;
 			//  Let rightptr point to the right one of curr and sibling chosen to merge ;
 			if (r_sibling) {
-				leftptr = curr; rightptr = /* Fill your code */;
+				leftptr = curr; 
+				rightptr = r_sibling;
 			} // r_sibling exists.
 			else {
-				leftptr = l_sibling; rightptr = /* Fill your code */;
+				leftptr = l_sibling; 
+				rightptr = curr;
 			} // surely l_sibling exists.
 
 			//   아래 빈 곳은 leftptr, rightptr 두 형제를 leftptr 형제로 합병하는 부분이 와야 함!! 
 			//   주의: 변수 i 가 두 형제 사이의 father 내의 중간 레코드를 가리키게 해 놓아야 함.
-			/* 
-			Fill 
-			your 
-			code 
-			*/
+			for (i = 0; i < father->fill_cnt; i++) {
+				if (father->ptr[i] == leftptr) {
+					break;
+				}
+			}
+			j = leftptr->fill_cnt;
+			leftptr->rec[j] = father->rec[i];
+			j++;
+			for (k = 0; k < rightptr->fill_cnt; k++, j++) {
+				leftptr->ptr[j] = rightptr->ptr[k];
+				leftptr->rec[j] = rightptr->rec[k];
+			}
+			leftptr->ptr[j] = rightptr->ptr[k];
+			leftptr->fill_cnt += 1 + rightptr->fill_cnt;
+			
+			free(rightptr);
+			printf("Merging has been done.\n");
+			
 
 			curr = father;
 			// Note that i has index of record in father to be deleted. 
