@@ -10,11 +10,14 @@ The concept of university lecture content will be organized and blog links will 
 ## 목차
 
 1. B-tree
-- 탐색
-- 삽입
-- 삭제
+- Retrieve
+- Insertion
+- Deletion(Redistribution, Merging)
 
 2. B+ tree
+- Retrieve
+- Insertion
+
 3. Hashing
 4. Trie
 5. Spell correction
