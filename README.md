@@ -19,6 +19,9 @@ The concept of university lecture content will be organized and blog links will 
 - Insertion
 
 3. Hashing
+- Insertion
+- with Chain Deletion
+
 4. Trie
 5. Spell correction
 6. Text searching
