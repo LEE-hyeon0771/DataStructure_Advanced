@@ -19,8 +19,9 @@ The concept of university lecture content will be organized and blog links will 
 - Insertion
 
 3. Hashing
-- Insertion
+- with Chain Insertion
 - with Chain Deletion
+- without Chain Insertion(Linear probing) 
 
 4. Trie
 5. Spell correction
