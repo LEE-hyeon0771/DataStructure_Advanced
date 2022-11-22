@@ -315,17 +315,17 @@ int check_num_links(char key[]) {
 	// move the curr, and fine the key. if the key doesn't exist in hashtable but has hash links,
 	// we have to use flag.
 	while (curr != -1) {
-		if (strcmp(key, Hashtable[HA].name/* Fill your code */) == 0) {
-			/* Fill your code */;
+		if (strcmp(key, Hashtable[curr].name) == 0) {
+			flag = 1;
 		}
 		count += 1;
-		curr = Hashtable[curr].link/* Fill your code */;
+		curr = Hashtable[curr].link;
 	}
 	if (flag != 1) {
 		printf("There are no records with such key.\n");
 		return -1;
 	}
-	return count/* Fill your code */;
+	return count;
 }
 
 int main(void)
