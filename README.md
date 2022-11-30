@@ -21,8 +21,10 @@ The concept of university lecture content will be organized and blog links will 
 3. Hashing
 - with Chain Insertion
 - with Chain Deletion
-- without Chain Insertion(Linear probing) 
+- without Chain Insertion(Linear probing, brent, completion) 
 
 4. Trie
-5. Spell correction
-6. Text searching
+- Spell correction
+
+5. Merge sorting
+- external : p-way algoritm
