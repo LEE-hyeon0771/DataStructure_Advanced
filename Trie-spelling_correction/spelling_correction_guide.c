@@ -90,6 +90,8 @@ nodeptr hang_down(char key[], nodeptr tn, int i) {
 	newn->right = NULL;
 	newn->below = NULL;
 	tn->below = newn;
+
+	return newn;
 } // hang_down
 
 float get_penalty(int n_s, int  n_d, int  n_i, int  n_t) {
@@ -112,18 +114,18 @@ nodeptr  insert_trie(char key[50]) {
 	if (res > 0) {
 		return;
 	}
-	if (root == NULL) {
+	if (ROOT_TRIE == NULL) {
 		tn = malloc(sizeof(nodetype));
 		tn->ch = key[0];
-		root = tn;
+		ROOT_TRIE = tn;
 		tn->right = NULL;
 		hangdown(key, tn, 1);
 	}
 	else if (prev == NULL) {
 		tn = malloc(sizeof(nodetype));
 		tn->ch = key[i];
-		tn->right = root;
-		root = tn;
+		tn->right = ROOT_TRIE;
+		ROOT_TRIE = tn;
 		hang_down(key, tn, i + 1);
 	}
 	else if (prev->below == curr) {
@@ -151,9 +153,11 @@ nodeptr  insert_trie(char key[50]) {
 		printf("logic error in insert_trie.");
 		exit(1);
 	}
+
+	return tn;
 } // function  insert_trie.
 
-void  transposition(nodeptr root_sub_trie, char key[], char  corr_key[], int ki, int ci, int n_s, int n_d, int n_i, int n_t)
+void transposition(nodeptr root_sub_trie, char key[], char  corr_key[], int ki, int ci, int n_s, int n_d, int n_i, int n_t)
 {
 	nodeptr  p, s;
 	int temp;
@@ -183,7 +187,7 @@ void  transposition(nodeptr root_sub_trie, char key[], char  corr_key[], int ki,
 } // transposition 
 
 //     we suppose that character  key[ki] is one altered from any one in nodes of first level of sub-trie.
-void  substitution(nodeptr root_sub_trie, char key[], char  corr_key[], int ki, int ci, int n_s, int n_d, int n_i, int n_t)
+void substitution(nodeptr root_sub_trie, char key[], char  corr_key[], int ki, int ci, int n_s, int n_d, int n_i, int n_t)
 {
 	nodeptr np, start_ptr;
 	int temp;
