@@ -44,11 +44,15 @@ nodeptr ROOT_TRIE = NULL; // Pointer to ROOT_TRIE node of the total trie.
 void retrieve_trie(nodeptr root_sub_trie, char key[], char corr_key[], int ki, int ci, int n_s, int n_d, int n_i, int n_t);
 void find_with_spell_correction(nodeptr root_sub_trie, char key[], char corr_key[], int ki, int ci, int n_s, int n_d, int n_i, int n_t);
 
-int search_trie(char key[], nodeptr* curr, nodeptr* prev)
+int search_trie(char key[], nodeptr* curr, nodeptr* prev, int *val_i)
 {
-	int i = 0;
-	*prev = NULL;
+	int i = 0; *prev = NULL;
 	*curr = ROOT_TRIE;
+
+
+	if (ROOT_TRIE == NULL) {
+		return -1;
+	}
 
 	do {
 		while (key[i] != '\0' && (*curr)->ch == key[i]) {
@@ -56,23 +60,24 @@ int search_trie(char key[], nodeptr* curr, nodeptr* prev)
 			i++;
 			(*curr) = (*curr)->below;
 		}
-		if ((*curr)->ch == '\0' && key[i] == '\0') {
-			return -1;
-		}
-		while (*curr != NULL && (*curr)->ch < key[i]) {
-			(*prev) = (*curr);
-			(*curr) = (*curr)->right;
-		}
-		if ((*curr) == NULL || (*curr)->ch > key[i]) {
+		if ((*curr)->ch == '\0' && key[i] == '\0')
 			return i;
+
+		while (*curr != NULL && (*curr)->ch < key[i]) {
+			*prev = *curr;
+			*curr = (*curr)->right;
+		}
+
+		if (*curr == NULL || (*curr)->ch > key[i]) {
+			*val_i = i;  return -1;
 		}
 	} while (1);
+
 } // search_trie
 
 // hang down the nodes for the remaining characters of key during the insertion.
 // trie nodes for key[i], key[i+1], ..... are attached vertically to the node  pointed to by tn .
 // return pointer to the last node.
-
 
 nodeptr hang_down(char key[], nodeptr tn, int i) {
 	nodeptr newn;
@@ -86,7 +91,7 @@ nodeptr hang_down(char key[], nodeptr tn, int i) {
 	}
 	newn = malloc(sizeof(nodetype));
 	newn->ch = '\0';
-	newn->bp = 0;
+	newn->bp = NULL;
 	newn->right = NULL;
 	newn->below = NULL;
 	tn->below = newn;
@@ -101,16 +106,12 @@ float get_penalty(int n_s, int  n_d, int  n_i, int  n_t) {
 //  insert a key into the trie.  
 //  it returns NULL: insertion failure; pointer to the last node: insertion success.
 nodeptr  insert_trie(char key[50]) {
-	/*
-	Fill
-	codes 미완 부분
-	*/
-	int res, i;
-	nodeptr root;
+
+	int res, i = 0;
 	nodeptr node_found, tn;
 	nodeptr curr, prev;
 
-	res = find_node_trie(key, &curr, &prev, &i);
+	res = search_trie(key, &curr, &prev, &i);
 	if (res > 0) {
 		return;
 	}
@@ -119,7 +120,8 @@ nodeptr  insert_trie(char key[50]) {
 		tn->ch = key[0];
 		ROOT_TRIE = tn;
 		tn->right = NULL;
-		hangdown(key, tn, 1);
+		hang_down(key, tn, 1);
+		
 	}
 	else if (prev == NULL) {
 		tn = malloc(sizeof(nodetype));
@@ -127,13 +129,16 @@ nodeptr  insert_trie(char key[50]) {
 		tn->right = ROOT_TRIE;
 		ROOT_TRIE = tn;
 		hang_down(key, tn, i + 1);
+		
 	}
+
 	else if (prev->below == curr) {
 		tn = malloc(sizeof(nodetype));
 		tn->ch = key[i];
 		prev->below = tn;
 		tn->right = curr;
 		hang_down(key, tn, i + 1);
+		
 	}
 	else if (prev->right == curr && curr != NULL) {
 		tn = malloc(sizeof(nodetype));
@@ -141,6 +146,7 @@ nodeptr  insert_trie(char key[50]) {
 		prev->right = tn;
 		tn->right = curr;
 		hang_down(key, tn, i + 1);
+		
 	}
 	else if (prev->right == curr && curr == NULL) {
 		tn = malloc(sizeof(nodetype));
@@ -148,6 +154,7 @@ nodeptr  insert_trie(char key[50]) {
 		prev->right = tn;
 		tn->right = NULL;
 		hang_down(key, tn, i + 1);
+		
 	}
 	else {
 		printf("logic error in insert_trie.");
@@ -155,9 +162,10 @@ nodeptr  insert_trie(char key[50]) {
 	}
 
 	return tn;
+	
 } // function  insert_trie.
 
-void transposition(nodeptr root_sub_trie, char key[], char  corr_key[], int ki, int ci, int n_s, int n_d, int n_i, int n_t)
+void  transposition(nodeptr root_sub_trie, char key[], char  corr_key[], int ki, int ci, int n_s, int n_d, int n_i, int n_t)
 {
 	nodeptr  p, s;
 	int temp;
@@ -169,10 +177,13 @@ void transposition(nodeptr root_sub_trie, char key[], char  corr_key[], int ki, 
 			s = p->below;
 			do {
 				if (s->ch == key[ki]) {
-					new_corr_key[ci] = p->ch;
-					new_corr_key[ci + 1] = s->ch;
-					new_corr_key[ci + 2] = '\0';
-					find_with_spell_correction(s->below, key, new_corr_key, ki + 2, ci + 2, n_s, n_d, n_i, n_t + 1);
+					
+					new_corr_key[ci] = key[ki+1];
+					new_corr_key[ci + 1] = key[ki];
+					ci++;
+					new_corr_key[ci + 1] = '\0';
+					ki++;
+					find_with_spell_correction(s->below, key, new_corr_key, ki + 1, ci + 1, n_s, n_d, n_i, n_t + 1);
 					break;
 				}
 				else {
@@ -187,22 +198,21 @@ void transposition(nodeptr root_sub_trie, char key[], char  corr_key[], int ki, 
 } // transposition 
 
 //     we suppose that character  key[ki] is one altered from any one in nodes of first level of sub-trie.
-void substitution(nodeptr root_sub_trie, char key[], char  corr_key[], int ki, int ci, int n_s, int n_d, int n_i, int n_t)
+void  substitution(nodeptr root_sub_trie, char key[], char  corr_key[], int ki, int ci, int n_s, int n_d, int n_i, int n_t)
 {
 	nodeptr np, start_ptr;
 	int temp;
 	char  new_corr_key[100];
 	strcpy(new_corr_key, corr_key); // 새로운 교정된 문자열 공간을 만들어 지금까지의 결과를 저장한다.
 	np = root_sub_trie;
+
 	do {
-		if (key[ki] == np->ch) {
-			np = np->right;
-			continue;
-		}
+
 		start_ptr = np->below;
 		new_corr_key[ci] = np->ch;
 		new_corr_key[ci + 1] = '\0';
-		find_with_spell_correction(start_ptr, key, new_corr_key, ki + 1, ci + 1, n_s + 1, n_d, n_i, n_t);
+		if(start_ptr)
+			find_with_spell_correction(start_ptr, key, new_corr_key, ki + 1, ci + 1, n_s + 1, n_d, n_i, n_t);
 		np = np->right;
 	} while (np);
 	return;
@@ -215,12 +225,15 @@ void  deletion(nodeptr root_sub_trie, char key[], char  corr_key[], int ki, int 
 	char  new_corr_key[100];
 	strcpy(new_corr_key, corr_key); //  corr_key string is copied to another space to protect corr_key from later change. 
 	np = root_sub_trie;
+
 	do {
 		start_ptr = np->below;
 		new_corr_key[ci] = np->ch;
 		new_corr_key[ci + 1] = '\0';
-		find_with_spell_correction(start_ptr, key, new_corr_key, ki, ci + 1, n_s, n_d + 1, n_i, n_t);
+		if(start_ptr)
+			find_with_spell_correction(start_ptr, key, new_corr_key, ki, ci + 1, n_s, n_d + 1, n_i, n_t);
 		np = np->right;
+
 	} while (np);
 	return;
 } // deletion 
@@ -235,7 +248,9 @@ void  insertion(nodeptr root_sub_trie, char key[], char  corr_key[], int ki, int
 
 	// ki+1 이후의 suffix 를 실패한 partial trie 에서 찾아 보도록 한다.
 	ki++;
-	find_with_spell_correction(start_ptr, key, new_corr_key, ki, ci, n_s, n_d, n_i + 1, n_t);
+	if(start_ptr)
+		find_with_spell_correction(start_ptr, key, new_corr_key, ki, ci, n_s, n_d, n_i + 1, n_t);
+
 	return;
 } // insertion 
 
@@ -246,11 +261,21 @@ void find_with_spell_correction(nodeptr root_sub_trie, char key[], char corr_key
 	if (!curr)	return; // impossible situation. So no result is registered. 
 
 	if (curr->ch == '\0' && key[ki] == '\0') { // a result found. So register the result.
-		strcpy(cwords[nres].word, corr_key); cwords[nres].penalty = get_penalty(n_s, n_d, n_i, n_t);
-		cwords[nres].ns = n_s; cwords[nres].nd = n_d; cwords[nres].ni = n_i; cwords[nres].nt = n_t;
-		if (get_penalty(n_s, n_d, n_i, n_t) == 0) found_perfect_match = 1;
+		strcpy(cwords[nres].word, corr_key);
+		cwords[nres].penalty = get_penalty(n_s, n_d, n_i, n_t);
+
+		cwords[nres].ns = n_s;
+		cwords[nres].nd = n_d;
+		cwords[nres].ni = n_i;
+		cwords[nres].nt = n_t;
+
+		if (get_penalty(n_s, n_d, n_i, n_t) == 0)
+			found_perfect_match = 1;
 		nres++;
-		if (nres >= 20000) { printf("too many possible corrections.\n"); c = getchar(); }
+		if (nres >= 20000) {
+			printf("too many possible corrections.\n");
+			c = getchar();
+		}
 		return;
 	}
 
@@ -320,7 +345,7 @@ void main() {
 	char c, command, word[200];
 	int insertion_cnt, res, widx, wcnt;
 	ty_rec record;
-	nodeptr last, curr, prev, root;
+	nodeptr last, curr, prev;
 	int ki = 0, ci = 0; // ki: 다음 처리할 key 의 글자 인덱스;    ci: 다음에 넣을 corr_key 의 인덱스.
 
 	FILE* fpr, * fpw, * fpr1;
