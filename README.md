@@ -27,4 +27,4 @@ The concept of university lecture content will be organized and blog links will 
 - Spell correction(substitution, insertion, deletion, transposition)
 
 5. Merge sorting
-- external : p-way algoritm
+- external : p-way algoritm, disk sort
